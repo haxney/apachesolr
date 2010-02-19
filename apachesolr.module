@@ -1614,7 +1614,7 @@ function apachesolr_cck_fields() {
       $result = db_query($query);
       while ($row = db_fetch_object($result)) {
         // Only deal with fields that have option widgets (facets don't make sense otherwise), or fields that have specific mappings.
-        if ((isset($mappings[$row->field_type][$row->widget_type]) ||  isset($mappings['per-field'][$row->field_name]))) {
+        if ((isset($mappings[$row->field_type][$row->widget_type]) || isset($mappings['per-field'][$row->field_name]))) {
           if (isset($mappings['per-field'][$row->field_name])) {
             $field = $mappings['per-field'][$row->field_name];
             $fields[$row->field_name] = $field;
