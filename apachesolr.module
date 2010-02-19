@@ -1629,6 +1629,7 @@ function apachesolr_cck_fields() {
           $row->indexing_callback    = $field['indexing_callback'];
           $row->display_callback     = $field['display_callback'];
           $row->facet_block_callback = $field['facet_block_callback'];
+          $row->default_index        = $field['default_index'];
           $row->multiple             = (bool) $row->multiple;
 
           $fields[$row->field_name] = array_merge((array) $fields[$row->field_name], (array) $row);
