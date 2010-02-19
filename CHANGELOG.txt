@@ -1,10 +1,12 @@
-// $Id: CHANGELOG.txt,v 1.1.2.99.2.87 2010/01/09 00:53:18 pwolanin Exp $
+// $Id: CHANGELOG.txt,v 1.1.2.99.2.88 2010/02/09 13:56:30 robertDouglass Exp $
 
 Apache Solr integration x.x-x.x, xxxx-xx-xx
 ------------------------------
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#666936 by pwolanin, robertDouglass, claudiu.cristea | justindodge: Fixed apachesolr.js - Drupal.behaviors.apachesolr does not respect context.
+
 
 Apache Solr integration 6.x-2.0-ALPHA2, 2010-01-08
 ------------------------------
@@ -20,7 +22,7 @@ http://drupal.org/cvs?commit=309746 by robertDouglass, add entity='comment' to c
 #657648 by kcoop: Added Add Smaller Limit Options to Apache Solr Cron Indexing.
 
 Apache Solr integration 6.x-2.0-ALPHA1, 2009-12-26
-------------------------------  
+------------------------------
 #664818 by robertDouglass, pounard, pwolanin | Scott Reynolds: Fixed Wrong watchdog() usage.
 #662232 by pwolanin | anarchivist: Changed Use language-neutral code like D7.
 #666648 by pwolanin: Changed Make hook_apachesolr_update_index() more generic by taking a namespace param also.
@@ -169,7 +171,7 @@ Apache Solr integration 6.x-1.0-beta8, 2009-04-16
 Apache Solr integration 6.x-1.0-beta7, 2009-04-03
 ------------------------------
 #410330 by pwolanin and bhuga, return more information for error 0.
-#293989 by bjaspan and vladimir.dolgopolov, add date facets for created and changed dates. 
+#293989 by bjaspan and vladimir.dolgopolov, add date facets for created and changed dates.
 #420290 by mkalkbrenner and pwolanin, add spaces around tags to avoid running words together.
 #368688 by hurleyit and pwolanin, send MLT docs instead of processed links to theme function.
 #383478 by pwolanin and JacobSingh, provide more information about autocommit lag, pending deletes.
@@ -182,7 +184,7 @@ Apache Solr integration 6.x-1.0-beta6, 2009-03-20
 #392978 by pwolanin and ncameron, workaround for those using php 5.1, update README.
 #402984 by JacobSingh and pwolanin, put MLT menu under the general ApacheSolr settings.
 #401442 by Janusman and pwolanin, no sort block when 0 results.
-#405732 by JacobSingh, pwolanin: Update to new SolrPhpClient (r6) and make ping() use drupal_http_request. 
+#405732 by JacobSingh, pwolanin: Update to new SolrPhpClient (r6) and make ping() use drupal_http_request.
 #405722 by JacobSingh, increase ping timeout and make it variable.
 #400882 by mkalkbrenner, fix faceting bug due to static counter in method add_field.
 #382358 by pwolanin, use tokenizer solr.CharStreamAwareWhitespaceTokenizerFactory to fix highlighting.
@@ -197,10 +199,10 @@ Apache Solr integration 6.x-1.0-beta5, 2009-02-27
 Apache Solr integration 6.x-1.0-beta4, 2009-02-23
 ------------------------------
 #380670 by pwolanin, only add a bq param for a node-type boost > 'Normal'.
-#379518 by pwolanin, correct mismatch in default boost between 
+#379518 by pwolanin, correct mismatch in default boost between
         solrconfig.xml and apachesolr_search.
 #380594 by pwolanin, empty the spellcheck dictionary if the index is deleted.
-#380644 by JacobSingh, Backwards compatability for old sort fields. 
+#380644 by JacobSingh, Backwards compatability for old sort fields.
 #380538 by pwolanin, fix code to find vid for taxonomy facet blocks.
 
 Apache Solr integration 6.x-1.0-beta3, 2009-02-20
@@ -210,7 +212,7 @@ Apache Solr integration 6.x-1.0-beta3, 2009-02-20
 #378270 by pwolanin, suppress MLT admin link when there is no block content.
 #378196 by pwolanin, remove PHP client from CVS per Drupal.org policy.
 #231200 by janusman and pwolanin, turn on mapping of accented to non-accented
-        ISO characters for indexing and search. 
+        ISO characters for indexing and search.
 #377494 by pwolanin, Update text type in schema to new example.
 #376270 by pwolanin, also add option to bias on recent comments/changes.
 #337879 by pwolanin and blackdog, Store relative not absolute paths.
