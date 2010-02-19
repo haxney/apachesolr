@@ -1,0 +1,140 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Apache Solr CCK helper hooks implementation.
+ */
+
+/**
+ * Get supported CCK fields on site.
+ *
+ * @return array
+ *   Key/value array, keys are field name, values are row settings
+ */
+function apachesolr_cck_get_supported_fields() {
+  $ret = array();
+
+  $supported = apachesolr_cck_supported_types();
+
+  $result = db_query("SELECT i.field_name, f.multiple, f.type AS field_type, i.widget_type, i.label FROM {content_node_field_instance} i JOIN {content_node_field} f ON i.field_name = f.field_name");
+
+  while ($row = db_fetch_object($result)) {
+    if (isset($supported[$row->field_type][$row->widget_type])) {
+      $ret[$row->field_name] = $row;
+    }
+  }
+
+  return $ret;
+}
+
+/**
+ * Implementation of hook_apachesolr_cck_fields_alter().
+ */
+function apachesolr_cck_apachesolr_cck_fields_alter(&$mappings) {
+  $supported = apachesolr_cck_supported_types();
+  $callbacks = apachesolr_cck_supported_types(TRUE);
+
+  $fields = apachesolr_cck_get_supported_fields();
+
+  foreach ($fields as $field_name => &$data) {
+    if ($callback = $supported[$data->field_type][$data->widget_type]) {
+      $mappings['per-field'][$field_name] = array(
+        'callback' => $callback,
+        'index_type' => $callbacks[$callback],
+        'label' => $data->label,
+      );
+    }
+  }
+}
+
+function apachesolr_cck_supported_types($callbacks = FALSE) {
+  static $supported = array(
+    // Indexes on number values for number_* fields
+    'number_integer' => array(
+      'optionwidgets_select' => 'apachesolr_cck_index_number_callback',
+      'optionwidgets_buttons' => 'apachesolr_cck_index_number_callback',
+      'optionwidgets_onoff' => 'apachesolr_cck_index_number_callback',
+      'number' => 'apachesolr_cck_index_number_callback',
+    ),
+    'number_decimal' => array(
+      'optionwidgets_select' => 'apachesolr_cck_index_number_callback',
+      'optionwidgets_buttons' => 'apachesolr_cck_index_number_callback',
+      'optionwidgets_onoff' => 'apachesolr_cck_index_number_callback',
+      'number' => 'apachesolr_cck_index_number_callback',
+    ),
+    'number_float' => array(
+      'optionwidgets_select' => 'apachesolr_cck_index_number_callback',
+      'optionwidgets_buttons' => 'apachesolr_cck_index_number_callback',
+      'optionwidgets_onoff' => 'apachesolr_cck_index_number_callback',
+      'number' => 'apachesolr_cck_index_number_callback',
+    ),
+    // Indexes for text fields
+    'text' => array(
+      'optionwidgets_select' => 'apachesolr_cck_index_text_callback',
+      'optionwidgets_buttons' => 'apachesolr_cck_index_text_callback',
+      'optionwidgets_onoff' => 'apachesolr_cck_index_text_callback',
+      'text_textfield' => 'apachesolr_cck_index_text_callback',
+      'text_textarea' => 'apachesolr_cck_index_text_callback',
+    ),
+    // Filter by filetype for filefield fields
+    'filefield' => array(
+      'filefield_widget' => 'apachesolr_cck_index_filemime_callback',
+      'imagefield_widget' => 'apachesolr_cck_index_filemime_callback',
+    ),
+  );
+  static $callback_types = array(
+    'apachesolr_cck_index_filemime_callback' => 'string',
+    'apachesolr_cck_index_number_callback' => 'float',
+    'apachesolr_cck_index_text_callback' => 'text',
+  );
+  if ($callbacks) {
+    return $callback_types;
+  }
+  else {
+    return $supported;
+  }
+}
+
+/**
+ * A function that gets called during indexing.
+ *
+ * @param object $node
+ *   The current node being indexed
+ * @param string $field_name
+ *   The current field being indexed
+ *
+ * @return array
+ *   An array of arrays. Each inner array is a value, and must be keyed
+ *   'safe' => $value
+ */
+function apachesolr_cck_index_number_callback($node, $field_name) {
+  $fields = array();
+  foreach ($node->$field_name as &$value) {
+    $fields[] = array('value' => (float)$value['value']);
+  }
+  return $fields;
+}
+
+/**
+ * @see apachesolr_cck_index_number_callback()
+ */
+
+function apachesolr_cck_index_text_callback($node, $field_name) {
+  $fields = array();
+  foreach ($node->$field_name as &$value) {
+    $fields[] = array('value' => $value['value']);
+  }
+  return $fields;
+}
+
+/**
+ * @see apachesolr_cck_index_number_callback()
+ */
+function apachesolr_cck_index_filemime_callback($node, $field_name) {
+  $fields = array();
+  foreach ($node->$field_name as &$value) {
+    $fields[] = array('value' => $field['filemime']);
+  }
+  return $fields;
+}
