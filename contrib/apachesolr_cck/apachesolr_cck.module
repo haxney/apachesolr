@@ -8,7 +8,7 @@
 
 /**
  * Get supported CCK fields on site.
- *
+ * 
  * @return array
  *   Key/value array, keys are field name, values are row settings
  */
@@ -28,6 +28,21 @@ function apachesolr_cck_get_supported_fields() {
   return $ret;
 }
 
+
+function apachesolr_cck_get_filefields_fields($nodetype) {
+  $ret = array();
+
+  $supported = apachesolr_cck_supported_types();
+
+  $result = db_query("SELECT i.field_name, f.multiple, f.type AS field_type, i.widget_type, i.label FROM {content_node_field_instance} i JOIN {content_node_field} f ON i.field_name = f.field_name WHERE f.type ='filefield' AND i.type_name = '%s'", $nodetype);
+
+  while ($row = db_fetch_object($result)) {
+      $ret[$row->field_name] = $row;
+  }
+
+  return $ret;
+}
+
 /**
  * Implementation of hook_apachesolr_cck_fields_alter().
  */
@@ -40,9 +55,9 @@ function apachesolr_cck_apachesolr_cck_fields_alter(&$mappings) {
   foreach ($fields as $field_name => &$data) {
     if ($callback = $supported[$data->field_type][$data->widget_type]) {
       $mappings['per-field'][$field_name] = array(
-        'callback' => $callback,
+        'indexing_callback' => $callback,
         'index_type' => $callbacks[$callback],
-        'label' => $data->label,
+        'display_callback' => $data->label,
       );
     }
   }
@@ -78,10 +93,10 @@ function apachesolr_cck_supported_types($callbacks = FALSE) {
       'text_textarea' => 'apachesolr_cck_index_text_callback',
     ),
     // Filter by filetype for filefield fields
-    'filefield' => array(
-      'filefield_widget' => 'apachesolr_cck_index_filemime_callback',
-      'imagefield_widget' => 'apachesolr_cck_index_filemime_callback',
-    ),
+    /*'filefield' => array(
+      'filefield_widget' => 'apachesolr_cck_index_filepath_callback',
+      'imagefield_widget' => 'apachesolr_cck_index_filepath_callback',
+    ),*/
   );
   static $callback_types = array(
     'apachesolr_cck_index_filemime_callback' => 'string',
@@ -98,7 +113,7 @@ function apachesolr_cck_supported_types($callbacks = FALSE) {
 
 /**
  * A function that gets called during indexing.
- *
+ * 
  * @param object $node
  *   The current node being indexed
  * @param string $field_name
@@ -128,13 +143,35 @@ function apachesolr_cck_index_text_callback($node, $field_name) {
   return $fields;
 }
 
+
 /**
- * @see apachesolr_cck_index_number_callback()
+ * Implementation of hook_apachesolr_update_index().
  */
-function apachesolr_cck_index_filemime_callback($node, $field_name) {
-  $fields = array();
-  foreach ($node->$field_name as &$value) {
-    $fields[] = array('value' => $field['filemime']);
+function apachesolr_cck_apachesolr_update_index(&$document, $node, $namespace) {
+  
+  $filefields = apachesolr_cck_get_filefields_fields($node->type);
+  
+  foreach($filefields as $filefield) {
+    
+    //Check fieldname
+    $fieldname = $filefield->field_name;
+    if(isset($node->$fieldname)) {
+      
+      //loop all images
+      foreach($node->$fieldname as $ff) {
+        
+        //filepath
+        if($ff['filepath']) {
+         $document->setMultiValue('ss_filefield_path', $ff['filepath']);
+         $document->setMultiValue('ss_filefield_path_absolute', file_create_url($ff['filepath']));
+        }
+        
+        //filemime
+        if($ff['filemime']) {
+         $document->setMultiValue('ss_filefield_mime', $ff['filemime']);
+        }
+      
+      }
+    }
   }
-  return $fields;
 }
