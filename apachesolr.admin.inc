@@ -161,9 +161,9 @@ function apachesolr_index_page() {
     $output .= drupal_get_form('apachesolr_delete_index_form');
   }
   else {
-    drupal_set_message(t('The index is in read-only mode. Options for deleting and re-indexing are therefore not available. The index mode can be changed on the !settings_page', array('!settings_page' => l(t('settings page'), 'admin/settings/apachesolr'))), 'warning'); 
+    drupal_set_message(t('The index is in read-only mode. Options for deleting and re-indexing are therefore not available. The index mode can be changed on the !settings_page', array('!settings_page' => l(t('settings page'), 'admin/settings/apachesolr'))), 'warning');
   }
-  
+
 
   return $output;
 }
@@ -249,6 +249,9 @@ function apachesolr_enabled_facets_form_submit($form, &$form_state) {
   foreach ($form_state['values']['apachesolr_enabled_facets'] as $module => $facets) {
     $enabled[$module] = array_filter($facets);
   }
+  // This cache being stale can prevent new facet filters from working.
+  $solr = apachesolr_get_solr();
+  $solr->clearCache();
   variable_set('apachesolr_enabled_facets', $enabled);
   drupal_set_message($form_state['values']['submit_message'], 'warning');
 }
@@ -265,9 +268,12 @@ function apachesolr_enabled_facets_form() {
   $module_facets = array();
   $module_list = array();
   foreach (module_implements('apachesolr_facets') as $module) {
-    $module_facets[$module] = module_invoke($module, 'apachesolr_facets');
-    uasort($module_facets[$module], 'apachesolr_sort_facets');
-    $module_list[$module] = $module;
+    $return = module_invoke($module, 'apachesolr_facets');
+    if (!empty($return)) {
+      $module_facets[$module] = $return;
+      uasort($module_facets[$module], 'apachesolr_sort_facets');
+      $module_list[$module] = $module;
+    }
   }
 
   $enabled_facets = apachesolr_get_enabled_facets();
@@ -284,6 +290,7 @@ function apachesolr_enabled_facets_form() {
     }
   }
   foreach($module_facets as $module => $facets) {
+
     $form['apachesolr_enabled_facets'][$module] = array(
       '#type' => 'fieldset',
       '#title' => check_plain($module_list[$module]['name']),
@@ -381,8 +388,8 @@ function apachesolr_clear_index_submit($form, &$form_state) {
     $form_state['redirect'] = 'admin/settings/apachesolr/index/batch/confirm';
   }
   else {
-  $form_state['redirect'] = 'admin/settings/apachesolr/index/clear/confirm';
-}
+    $form_state['redirect'] = 'admin/settings/apachesolr/index/clear/confirm';
+  }
 }
 
 /**
@@ -598,7 +605,7 @@ function apachesolr_mlt_block_form($delta = NULL) {
     '#options' => drupal_map_assoc(array(3, 5, 7, 10, 12, 15, 20, 25, 30, 35, 40)),
     '#default_value' => $block['mlt_maxqt'],
   );
-  
+
   $form['restrictions'] = array(
     '#type' => 'fieldset',
     '#title' => t('Filters'),
