@@ -1584,9 +1584,9 @@ function apachesolr_cck_fields() {
           $row->name                 = 'cck_' . $row->field_name;
           $row->index_type           = $field['index_type'];
           $row->indexing_callback    = $field['indexing_callback'];
-          $row->display_callback     = $field['display_callback'];
+          $row->display_callback     = (!empty($field['display_callback'])) ? $field['display_callback'] : 'apachesolr_cck_display_default_callback';
           $row->facet_block_callback = $field['facet_block_callback'];
-          $row->default_index        = $field['default_index'];
+          $row->default_index        = (!empty($field['default_index'])) ? $field['default_index'] : 'value';
           $row->multiple             = (bool) $row->multiple;
 
           $fields[$row->field_name] = array_merge((array) $fields[$row->field_name], (array) $row);
@@ -1618,45 +1618,11 @@ function apachesolr_content_fieldapi($op) {
  *  @param $options
  *    An array of options including the hook_block $delta.
  */
-function apachesolr_cck_text_field_callback($facet, $options) {
+function apachesolr_cck_display_default_callback($facet, $options) {
+  $fields = apachesolr_cck_fields();
+  $delta = $options['delta'];
   if (function_exists('content_format')) {
-    return content_format($options['delta'], array('value' => $facet));
-  }
-  else {
-    return $facet;
-  }
-}
-
-/**
- * Use the content.module's content_format() to format the
- * field based on its nid ($facet).
- *
- *  @param $facet string
- *    The indexed value
- *  @param $options
- *    An array of options including the hook_block $delta.
- */
-function apachesolr_cck_nodereference_field_callback($facet, $options) {
-  if (function_exists('content_format')) {
-    return strip_tags(content_format($options['delta'], array('nid' => $facet)));
-  }
-  else {
-    return $facet;
-  }
-}
-
-/**
- * Use the content.module's content_format() to format the
- * field based on its uid ($facet).
- *
- *  @param $facet string
- *    The indexed value
- *  @param $options
- *    An array of options including the hook_block $delta.
- */
-function apachesolr_cck_userreference_field_callback($facet, $options) {
-  if (function_exists('content_format')) {
-    return strip_tags(content_format($options['delta'], array('uid' => $facet)));
+    return content_format($delta, array($fields[$delta]['default_index'] => $facet));
   }
   else {
     return $facet;
