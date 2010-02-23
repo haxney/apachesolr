@@ -1,6 +1,6 @@
 ; $Id$
 name = "Apache Solr CCK helper"
-description = "Provide CCK field indexing for as much as CCK field we can, this configurable via administration pages."
+description = "Provide CCK field indexing for CCK fields."
 package = "Apache Solr"
 core = 6.x
 dependencies[] = apachesolr
