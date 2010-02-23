@@ -292,3 +292,14 @@ function apachesolr_cck_apachesolr_cck_fields_alter(&$mappings) {
     );
   }
 }
+
+/**
+ * Implementation of hook_apachesolr_prepare_query().
+ *
+ * Adds the CCK fields to the 'fl' parameter.
+ */
+function apachesolr_date_apachesolr_prepare_query(&$query, &$params) {
+  foreach (apachesolr_cck_fields() as $field => $info) {
+    $params['fl'] .= ','. apachesolr_index_key($info);
+  }
+}
