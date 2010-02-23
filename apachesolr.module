@@ -1583,7 +1583,7 @@ function apachesolr_cck_fields() {
           // depend on it to route program flow to cck specific handlers.
           $row->name                 = 'cck_' . $row->field_name;
           $row->index_type           = $field['index_type'];
-          $row->indexing_callback    = (!empty($field['indexing_callback'])) ? $field['indexing_callback']; 'apachesolr_cck_index_default_callback';
+          $row->indexing_callback    = (!empty($field['indexing_callback'])) ? $field['indexing_callback'] : 'apachesolr_cck_index_default_callback';
           $row->display_callback     = (!empty($field['display_callback'])) ? $field['display_callback'] : 'apachesolr_cck_display_default_callback';
           $row->facet_block_callback = $field['facet_block_callback'];
           $row->default_index        = (!empty($field['default_index'])) ? $field['default_index'] : 'value';
