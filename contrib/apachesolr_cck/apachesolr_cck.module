@@ -7,179 +7,319 @@
  */
 
 /**
- * Get supported CCK fields on site.
- * 
- * @return array
- *   Key/value array, keys are field name, values are row settings
- */
-function apachesolr_cck_get_supported_fields() {
-  $ret = array();
-
-  $supported = apachesolr_cck_supported_types();
-
-  $result = db_query("
-    SELECT i.field_name,
-           f.multiple,
-           f.type AS field_type,
-           i.widget_type,
-           i.label
-    FROM {content_node_field_instance} i
-    JOIN {content_node_field} f
-      ON i.field_name = f.field_name
-  ");
-
-  while ($row = db_fetch_object($result)) {
-    if (isset($supported[$row->field_type][$row->widget_type])) {
-      $ret[$row->field_name] = $row;
-    }
-  }
-
-  return $ret;
-}
-
-
-function apachesolr_cck_get_filefields_fields($nodetype) {
-  $ret = array();
-
-  $supported = apachesolr_cck_supported_types();
-
-  $result = db_query("SELECT i.field_name, f.multiple, f.type AS field_type, i.widget_type, i.label FROM {content_node_field_instance} i JOIN {content_node_field} f ON i.field_name = f.field_name WHERE f.type ='filefield' AND i.type_name = '%s'", $nodetype);
-
-  while ($row = db_fetch_object($result)) {
-      $ret[$row->field_name] = $row;
-  }
-
-  return $ret;
-}
-
-/**
  * Implementation of hook_apachesolr_cck_fields_alter().
  */
 function apachesolr_cck_apachesolr_cck_fields_alter(&$mappings) {
-  $supported = apachesolr_cck_supported_types();
-  $callbacks = apachesolr_cck_supported_types(TRUE);
-
-  $fields = apachesolr_cck_get_supported_fields();
-
-  foreach ($fields as $field_name => &$data) {
-    if ($callback = $supported[$data->field_type][$data->widget_type]) {
-      $mappings['per-field'][$field_name] = array(
-        'indexing_callback' => $callback,
-        'index_type' => $callbacks[$callback],
-        'display_callback' => $data->label,
-      );
-    }
-  }
-}
-
-function apachesolr_cck_supported_types($callbacks = FALSE) {
-  static $supported = array(
-    // Indexes on number values for number_* fields
-    'number_integer' => array(
-      'optionwidgets_select' => 'apachesolr_cck_index_number_callback',
-      'optionwidgets_buttons' => 'apachesolr_cck_index_number_callback',
-      'optionwidgets_onoff' => 'apachesolr_cck_index_number_callback',
-      'number' => 'apachesolr_cck_index_number_callback',
+  $mappings['nodereference'] = array(
+    'nodereference_select' => array(
+      'index_type' => 'integer',
+      'default_index' => 'nid',
     ),
-    'number_decimal' => array(
-      'optionwidgets_select' => 'apachesolr_cck_index_number_callback',
-      'optionwidgets_buttons' => 'apachesolr_cck_index_number_callback',
-      'optionwidgets_onoff' => 'apachesolr_cck_index_number_callback',
-      'number' => 'apachesolr_cck_index_number_callback',
+    'nodereference_buttons' => array(
+      'index_type' => 'integer',
+      'default_index' => 'nid',
     ),
-    'number_float' => array(
-      'optionwidgets_select' => 'apachesolr_cck_index_number_callback',
-      'optionwidgets_buttons' => 'apachesolr_cck_index_number_callback',
-      'optionwidgets_onoff' => 'apachesolr_cck_index_number_callback',
-      'number' => 'apachesolr_cck_index_number_callback',
+    'nodereference_autocomplete' => array(
+      'index_type' => 'integer',
+      'default_index' => 'nid',
     ),
-    // Indexes for text fields
-    'text' => array(
-      'optionwidgets_select' => 'apachesolr_cck_index_text_callback',
-      'optionwidgets_buttons' => 'apachesolr_cck_index_text_callback',
-      'optionwidgets_onoff' => 'apachesolr_cck_index_text_callback',
-      'text_textfield' => 'apachesolr_cck_index_text_callback',
-      'text_textarea' => 'apachesolr_cck_index_text_callback',
-    ),
-    // Filter by filetype for filefield fields
-    /*'filefield' => array(
-      'filefield_widget' => 'apachesolr_cck_index_filepath_callback',
-      'imagefield_widget' => 'apachesolr_cck_index_filepath_callback',
-    ),*/
   );
-  static $callback_types = array(
-    'apachesolr_cck_index_filemime_callback' => 'string',
-    'apachesolr_cck_index_number_callback' => 'float',
-    'apachesolr_cck_index_text_callback' => 'text',
+
+  $mappings['number_integer'] = array(
+    'number' => array(
+      'index_type' => 'integer',
+    ),
+    'optionwidgets_select' => array(
+      'index_type' => 'integer',
+    ),
+    'optionwidgets_buttons' => array(
+      'index_type' => 'integer',
+    ),
+    'optionwidgets_onoff' => array(
+      'index_type' => 'integer',
+    ),
   );
-  if ($callbacks) {
-    return $callback_types;
+
+  $mappings['number_decimal'] = array(
+    'number' => array(
+      'index_type' => 'tdouble',
+    ),
+    'optionwidgets_select' => array(
+      'index_type' => 'tdouble',
+    ),
+    'optionwidgets_buttons' => array(
+      'index_type' => 'tdouble',
+    ),
+    'optionwidgets_onoff' => array(
+      'index_type' => 'tdouble',
+    ),
+  );
+
+  $mappings['number_float'] = array(
+    'number' => array(
+      'index_type' => 'tdouble',
+    ),
+    'optionwidgets_select' => array(
+      'index_type' => 'tdouble',
+    ),
+    'optionwidgets_buttons' => array(
+      'index_type' => 'tdouble',
+    ),
+    'optionwidgets_onoff' => array(
+      'index_type' => 'tdouble',
+    ),
+  );
+
+  $mappings['text'] = array(
+    'optionwidgets_select' => array(
+      'index_type' => 'string',
+    ),
+    'optionwidgets_buttons' => array(
+      'index_type' => 'string',
+    ),
+    'optionwidgets_onoff' => array(
+      'index_type' => 'string',
+    ),
+    'text_textfield' => array(
+      'index_type' => 'string',
+    ),
+    'text_textarea' => array(
+      'index_type' => 'text',
+    ),
+  );
+
+  $mappings['userreference'] = array(
+    'userreference_select' => array(
+      'index_type' => 'integer',
+      'default_index' => 'uid',
+    ),
+    'userreference_buttons' => array(
+      'index_type' => 'integer',
+      'default_index' => 'uid',
+    ),
+    'userreference_autocomplete' => array(
+      'index_type' => 'integer',
+      'default_index' => 'uid',
+    ),
+  );
+
+  if(module_exists('email')) {
+    $mappings['email'] = array(
+      'email_textfield' => array(
+        'index_type' => 'string',
+        'default_index' => 'email',
+      ),
+    );
   }
-  else {
-    return $supported;
+
+  // TODO: needs multiple-field support.
+  if (module_exists('filefield')) {
+    $mappings['filefield'] = array(
+      'filefield_widget' => array(
+        'index_type' => 'string',
+        'default_index' => 'filemime',
+      ),
+      'imagefield_widget' => array(
+        'index_type' => 'string',
+        'default_index' => 'filemime',
+      ),
+    );
+  }
+
+  // TODO: needs multiple-field support.
+  if (module_exists('link')) {
+    $mappings['link'] = array(
+      'link' => array(
+        'index_type' => 'string',
+        'default_index' => 'url',
+      ),
+    );
+  }
+
+  if (module_exists('phone')) {
+    $mappings['fr_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['it_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['ch_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['ca_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['cr_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['pa_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['uk_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['ru_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['es_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['au_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['cs_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['hu_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['nl_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['il_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['nz_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['br_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['hk_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['mo_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['ph_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['jo_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['eg_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+
+    $mappings['int_phone'] = array(
+      'phone_textfield' => array(
+        'index_type' => 'string',
+      ),
+    );
+  }
+
+  if (module_exists('viewfield')) {
+    $mappings['viewfield'] = array(
+      'viewfield_select' => array(
+        'index_type' => 'string',
+        'default_index' => 'vname',
+      ),
+    );
+  }
+
+  if (module_exists('viewreference')) {
+    $mappings['viewreference'] = array(
+      'viewreference_select' => array(
+        'index_type' => 'integer',
+        'default_index' => 'view_id',
+      ),
+      'viewreference_autocomplete' => array(
+        'index_type' => 'integer',
+        'default_index' => 'view_id',
+      ),
+    );
   }
 }
-
-/**
- * A function that gets called during indexing.
- * 
- * @param object $node
- *   The current node being indexed
- * @param string $field_name
- *   The current field being indexed
- *
- * @return array
- *   An array of arrays. Each inner array is a value, and must be keyed
- *   'safe' => $value
- */
-function apachesolr_cck_index_number_callback($node, $field_name) {
-  $fields = array();
-  foreach ($node->$field_name as &$value) {
-    $fields[] = array('value' => (float)$value['value']);
-  }
-  return $fields;
-}
-
-/**
- * @see apachesolr_cck_index_number_callback()
- */
-
-function apachesolr_cck_index_text_callback($node, $field_name) {
-  $fields = array();
-  foreach ($node->$field_name as &$value) {
-    $fields[] = array('value' => $value['value']);
-  }
-  return $fields;
-}
-
 
 /**
  * Implementation of hook_apachesolr_update_index().
  */
 function apachesolr_cck_apachesolr_update_index(&$document, $node, $namespace) {
-  
+
   $filefields = apachesolr_cck_get_filefields_fields($node->type);
-  
+
   foreach($filefields as $filefield) {
-    
+
     //Check fieldname
     $fieldname = $filefield->field_name;
     if(isset($node->$fieldname)) {
-      
+
       //loop all images
       foreach($node->$fieldname as $ff) {
-        
+
         //filepath
         if($ff['filepath']) {
          $document->setMultiValue('ss_filefield_path', $ff['filepath']);
          $document->setMultiValue('ss_filefield_path_absolute', file_create_url($ff['filepath']));
         }
-        
+
         //filemime
         if($ff['filemime']) {
          $document->setMultiValue('ss_filefield_mime', $ff['filemime']);
         }
-      
+
       }
     }
   }
