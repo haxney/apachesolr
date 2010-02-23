@@ -17,7 +17,16 @@ function apachesolr_cck_get_supported_fields() {
 
   $supported = apachesolr_cck_supported_types();
 
-  $result = db_query("SELECT i.field_name, f.multiple, f.type AS field_type, i.widget_type, i.label FROM {content_node_field_instance} i JOIN {content_node_field} f ON i.field_name = f.field_name");
+  $result = db_query("
+    SELECT i.field_name,
+           f.multiple,
+           f.type AS field_type,
+           i.widget_type,
+           i.label
+    FROM {content_node_field_instance} i
+    JOIN {content_node_field} f
+      ON i.field_name = f.field_name
+  ");
 
   while ($row = db_fetch_object($result)) {
     if (isset($supported[$row->field_type][$row->widget_type])) {
