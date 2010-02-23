@@ -292,35 +292,3 @@ function apachesolr_cck_apachesolr_cck_fields_alter(&$mappings) {
     );
   }
 }
-
-/**
- * Implementation of hook_apachesolr_update_index().
- */
-function apachesolr_cck_apachesolr_update_index(&$document, $node, $namespace) {
-
-  $filefields = apachesolr_cck_get_filefields_fields($node->type);
-
-  foreach($filefields as $filefield) {
-
-    //Check fieldname
-    $fieldname = $filefield->field_name;
-    if(isset($node->$fieldname)) {
-
-      //loop all images
-      foreach($node->$fieldname as $ff) {
-
-        //filepath
-        if($ff['filepath']) {
-         $document->setMultiValue('ss_filefield_path', $ff['filepath']);
-         $document->setMultiValue('ss_filefield_path_absolute', file_create_url($ff['filepath']));
-        }
-
-        //filemime
-        if($ff['filemime']) {
-         $document->setMultiValue('ss_filefield_mime', $ff['filemime']);
-        }
-
-      }
-    }
-  }
-}
