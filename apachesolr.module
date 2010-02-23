@@ -1553,50 +1553,7 @@ function apachesolr_cck_fields() {
     $fields = array();
     // If CCK isn't enabled, do nothing.
     if (module_exists('content')) {
-      // A single default mapping for all text fields.
-      $mappings['text'] = array(
-        'optionwidgets_select' => array(
-          'display_callback' => 'apachesolr_cck_text_field_callback',
-          'index_type' => 'string',
-        ),
-        'optionwidgets_buttons' => array(
-          'display_callback' => 'apachesolr_cck_text_field_callback',
-          'index_type' => 'string',
-        ),
-      );
-      $mappings['nodereference'] = array(
-        'nodereference_buttons' => array(
-          'display_callback' => 'apachesolr_cck_nodereference_field_callback',
-          'indexing_callback' => 'apachesolr_cck_nodereference_indexing_callback',
-          'index_type' => 'integer',
-        ),
-        'nodereference_select' => array(
-          'display_callback' => 'apachesolr_cck_nodereference_field_callback',
-          'indexing_callback' => 'apachesolr_cck_nodereference_indexing_callback',
-          'index_type' => 'integer',
-        ),
-        'nodereference_autocomplete' => array(
-          'display_callback' => 'apachesolr_cck_nodereference_field_callback',
-          'indexing_callback' => 'apachesolr_cck_nodereference_indexing_callback',
-          'index_type' => 'integer',
-        ),
-      );
-      $mappings['userreference'] = array(
-        'userreference_buttons' => array(
-          'display_callback' => 'apachesolr_cck_userreference_field_callback',
-          'index_type' => 'integer',
-        ),
-        'userreference_select' => array(
-          'display_callback' => 'apachesolr_cck_userreference_field_callback',
-          'indexing_callback' => 'apachesolr_cck_userreference_indexing_callback',
-          'index_type' => 'integer',
-        ),
-        'userreference_autocomplete' => array(
-          'display_callback' => 'apachesolr_cck_userreference_field_callback',
-          'indexing_callback' => 'apachesolr_cck_userreference_indexing_callback',
-          'index_type' => 'integer',
-        ),
-      );
+      $mappings = array();
       // Allow other modules to add or alter mappings.
       drupal_alter('apachesolr_cck_fields', $mappings);
 
