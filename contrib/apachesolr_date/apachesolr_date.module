@@ -11,7 +11,7 @@ function apachesolr_date_apachesolr_facets() {
     foreach ($fields as $name => $field) {
       if (in_array($field['field_type'], array('date', 'datetime', 'datestamp'))) {
         $cck_info = content_fields($field['field_name']);
-        // Only fields with a value2 have end dates to facet upon. 
+        // Only fields with a value2 have end dates to facet upon.
         if (isset($cck_info['columns']['value2'])) {
           // $delta can only be 32 chars, and the CCK field name may be this
           // long also, so we cannot add anything to it.
@@ -25,7 +25,7 @@ function apachesolr_date_apachesolr_facets() {
       }
     }
   }
-  return $facets; 
+  return $facets;
 }
 
 /**
@@ -104,14 +104,14 @@ function apachesolr_date_apachesolr_prepare_query(&$query) {
       $cck_field = content_fields($facet_definitions[$key]['field_name']);
       $query->set_available_sort($value, array(
         'title' => $cck_field['widget']['label'], // how the sort is to appear in the sorts block
-        'default' => 'desc', 
+        'default' => 'desc',
        ));
     }
   }
 }
 
 /**
- * Implementation of hook_apachesolr_cck_fields_alter.
+ * Implementation of hook_apachesolr_cck_fields_alter().
  * This function adds the CCK date fields' definitions to let
  * them be recognized as facets.
  */
@@ -246,7 +246,7 @@ function apachesolr_date_search_date_range($query, $facet_field) {
     // and if that doesn't find any CCK field definition for us, we hack off
     // the last four characters (presumed to be '_end' for an ending date),
     // and try again. If that doesn't find anything we go home.
-    
+
     //8 for trie ranges... but we went back to dates
     $field_name = substr($facet_field, 8);
     //$field_name = substr($facet_field, 7);
@@ -261,7 +261,7 @@ function apachesolr_date_search_date_range($query, $facet_field) {
       $db_info = content_database_info($field);
       $column = $db_info['columns']['value2']['column'];
     }
-    
+
     // By this point we should have the following:
     //   $field_name, a cck field name
     //   $field, a cck field definition
@@ -270,7 +270,7 @@ function apachesolr_date_search_date_range($query, $facet_field) {
     if (!$field) {
       return;
     }
- 
+
     $tz = new DateTimeZone(isset($field['timezone_db']) ? $field['timezone_db'] : 'UTC');
     $table = $db_info['table'];
     $start_value = db_result(db_query("SELECT MIN(cck.$column) FROM {{$table}} cck INNER JOIN {node} n WHERE n.status = 1"));
@@ -329,7 +329,7 @@ function apachesolr_date_date_facet_block($response, $query, $module, $delta, $f
     $options['query'] = $new_query->get_url_queryvalues();
     array_unshift($items, theme('apachesolr_unclick_link', $facet_text, $new_query->get_path(), $options));
   }
-  
+
   // Add links for additional date filters.
   if (!empty($response->facet_counts->facet_dates->$facet_field)) {
     $field = clone $response->facet_counts->facet_dates->$facet_field;
