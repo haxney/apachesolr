@@ -95,8 +95,10 @@ function apachesolr_date_apachesolr_prepare_query(&$query) {
   // Because we get the enabled facets just from apachesolr_search we're
   // limiting sorting to start dates.
   $enabled_facets = apachesolr_get_enabled_facets('apachesolr_search');
-  $facet_definitions = apachesolr_date_apachesolr_facets();
-  $facet_definitions += apachesolr_search_apachesolr_facets();
+  $facet_definitions = array_merge(
+    (array)apachesolr_date_apachesolr_facets(),
+    (array)apachesolr_search_apachesolr_facets()
+  );
   foreach ($enabled_facets as $key => $value) {
     if (strpos($value, 'tds_cck_field_date') !== FALSE) {
       $cck_field = content_fields($facet_definitions[$key]['field_name']);
