@@ -100,7 +100,7 @@ function apachesolr_date_apachesolr_prepare_query(&$query) {
     (array)apachesolr_search_apachesolr_facets()
   );
   foreach ($enabled_facets as $key => $value) {
-    if (strpos($value, 'tds_cck_field_date') !== FALSE) {
+    if (preg_match('/^tds_cck_[a-zA-Z0-9_]+/', $value) !== FALSE) {
       $cck_field = content_fields($facet_definitions[$key]['field_name']);
       $query->set_available_sort($value, array(
         'title' => $cck_field['widget']['label'], // how the sort is to appear in the sorts block
